@@ -1,0 +1,89 @@
+-- TABELA: usuarios
+CREATE TABLE usuarios (
+    id SERIAL PRIMARY KEY,
+    nome_completo VARCHAR(100) NOT NULL,
+    email VARCHAR(120) NOT NULL UNIQUE,
+    senha VARCHAR(255) NOT NULL,
+    tipo VARCHAR(20) NOT NULL CHECK (tipo IN ('CIDADAO', 'ANALISTA', 'ADMIN')),
+    data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- TABELA: bairros
+CREATE TABLE bairros (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL UNIQUE,
+    cidade VARCHAR(100) NOT NULL,
+    estado VARCHAR(2) NOT NULL
+);
+
+-- TABELA: alertas
+CREATE TABLE alertas (
+    id SERIAL PRIMARY KEY,
+    usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
+    url_imagem TEXT NOT NULL,
+    latitude DECIMAL(9,6) NOT NULL,
+    longitude DECIMAL(9,6) NOT NULL,
+    endereco VARCHAR(200) NOT NULL,
+    referencia VARCHAR(200),
+    descricao TEXT,
+    status VARCHAR(20) NOT NULL CHECK (status IN ('PENDENTE', 'AVALIADO')),
+    nivel_risco VARCHAR(20) CHECK (nivel_risco IN ('BAIXO', 'MEDIO', 'ALTO', 'CRITICO')),
+    analista_id INTEGER REFERENCES usuarios(id),
+    observacoes TEXT,
+    data_envio TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    bairro_id INTEGER REFERENCES bairros(id)
+);
+
+-- TABELA: comentarios_alertas
+CREATE TABLE comentarios_alertas (
+    id SERIAL PRIMARY KEY,
+    alerta_id INTEGER NOT NULL REFERENCES alertas(id),
+    usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
+    mensagem TEXT NOT NULL,
+    data_comentario TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- TABELA: logs_acesso
+CREATE TABLE logs_acesso (
+    id SERIAL PRIMARY KEY,
+    usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
+    ip VARCHAR(45) NOT NULL,
+    navegador VARCHAR(200),
+    data_login TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- TABELA: plataformas_contato
+CREATE TABLE plataformas_contato (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(50) NOT NULL UNIQUE,
+    icone VARCHAR(100)
+);
+
+-- TABELA: contatos_usuarios
+CREATE TABLE contatos_usuarios (
+    id SERIAL PRIMARY KEY,
+    usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
+    plataforma_id INTEGER NOT NULL REFERENCES plataformas_contato(id),
+    valor VARCHAR(150) NOT NULL
+);
+
+-- TABELA: anexos_alertas
+CREATE TABLE anexos_alertas (
+    id SERIAL PRIMARY KEY,
+    alerta_id INTEGER NOT NULL REFERENCES alertas(id),
+    usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
+    url_arquivo TEXT NOT NULL,
+    tipo VARCHAR(50) NOT NULL,
+    descricao VARCHAR(200),
+    data_envio TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- TABELA: avaliacoes_alertas
+CREATE TABLE avaliacoes_alertas (
+    id SERIAL PRIMARY KEY,
+    alerta_id INTEGER NOT NULL UNIQUE REFERENCES alertas(id),
+    usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
+    nota INTEGER NOT NULL CHECK (nota BETWEEN 1 AND 5),
+    comentario TEXT,
+    data_avaliacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
