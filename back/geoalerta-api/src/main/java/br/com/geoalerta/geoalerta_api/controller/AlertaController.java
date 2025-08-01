@@ -1,11 +1,11 @@
 package br.com.geoalerta.geoalerta_api.controller;
 
 import br.com.geoalerta.geoalerta_api.dto.AlertaResponseDTO;
-import br.com.geoalerta.geoalerta_api.model.Alerta;
 import br.com.geoalerta.geoalerta_api.service.AlertaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -29,14 +29,23 @@ public class AlertaController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    public ResponseEntity<AlertaResponseDTO> criar(@RequestBody Alerta alerta) {
-        AlertaResponseDTO novoAlerta = alertaService.criar(alerta);
+    // ✅ Novo endpoint que aceita multipart/form-data com imagem e campos separados
+    @PostMapping(consumes = {"multipart/form-data"})
+    public ResponseEntity<AlertaResponseDTO> criarComImagem(
+            @RequestParam("usuarioId") Long usuarioId,
+            @RequestParam("descricao") String descricao,
+            @RequestParam("endereco") String endereco,
+            @RequestParam("referencia") String referencia,
+            @RequestParam("latitude") Double latitude,
+            @RequestParam("longitude") Double longitude,
+            @RequestParam("imagem") MultipartFile imagem
+    ) {
+        AlertaResponseDTO novoAlerta = alertaService.criarComImagem(usuarioId, descricao, endereco, referencia, latitude, longitude, imagem);
         return ResponseEntity.ok(novoAlerta);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AlertaResponseDTO> atualizar(@PathVariable Long id, @RequestBody Alerta alertaAtualizado) {
+    public ResponseEntity<AlertaResponseDTO> atualizar(@PathVariable Long id, @RequestBody br.com.geoalerta.geoalerta_api.model.Alerta alertaAtualizado) {
         AlertaResponseDTO atualizado = alertaService.atualizar(id, alertaAtualizado);
         if (atualizado != null) {
             return ResponseEntity.ok(atualizado);
@@ -49,5 +58,11 @@ public class AlertaController {
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         alertaService.deletar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/usuario/{id}")
+    public ResponseEntity<List<AlertaResponseDTO>> listarPorUsuario(@PathVariable Long id) {
+        List<AlertaResponseDTO> alertas = alertaService.listarPorUsuario(id);
+        return ResponseEntity.ok(alertas);
     }
 }

@@ -1,9 +1,11 @@
 package br.com.geoalerta.geoalerta_api.controller;
 
+import br.com.geoalerta.geoalerta_api.dto.LoginRequestDTO;
+import br.com.geoalerta.geoalerta_api.dto.UsuarioResponseDTO;
 import br.com.geoalerta.geoalerta_api.model.Usuario;
 import br.com.geoalerta.geoalerta_api.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,7 +13,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/usuarios")
-@CrossOrigin(origins = "*")
 public class UsuarioController {
 
     @Autowired
@@ -42,4 +43,41 @@ public class UsuarioController {
         Optional<Usuario> usuario = usuarioService.buscarPorEmail(email);
         return usuario.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<UsuarioResponseDTO> login(@RequestBody LoginRequestDTO loginDto) {
+        Usuario usuario = usuarioService.login(loginDto.getEmail(), loginDto.getSenha());
+
+        if (usuario == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        UsuarioResponseDTO response = new UsuarioResponseDTO(
+            usuario.getId(),
+            usuario.getNomeCompleto(),
+            usuario.getEmail(),
+            usuario.getTipo(),
+            usuario.getDataCriacao()
+        );
+
+        return ResponseEntity.ok(response);
+    }
+    
+    @PutMapping("/{id}")
+    public ResponseEntity<UsuarioResponseDTO> atualizarUsuario(@PathVariable Long id, @RequestBody Usuario usuarioAtualizado) {
+        try {
+            Usuario atualizado = usuarioService.atualizarUsuario(id, usuarioAtualizado.getNomeCompleto(), usuarioAtualizado.getSenha());
+            UsuarioResponseDTO dto = new UsuarioResponseDTO(
+                atualizado.getId(),
+                atualizado.getNomeCompleto(),
+                atualizado.getEmail(),
+                atualizado.getTipo(),
+                atualizado.getDataCriacao()
+            );
+            return ResponseEntity.ok(dto);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }

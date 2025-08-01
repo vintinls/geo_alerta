@@ -33,4 +33,32 @@ public class UsuarioService {
     public boolean emailExiste(String email) {
         return usuarioRepository.existsByEmail(email);
     }
+    
+    public Usuario login(String email, String senha) {
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(email);
+
+        if (usuarioOpt.isPresent()) {
+            Usuario usuario = usuarioOpt.get();
+            if (usuario.getSenha().equals(senha)) {
+                return usuario;
+            }
+        }
+
+        return null;
+    }
+    
+    public Usuario atualizarUsuario(Long id, String novoNome, String novaSenha) {
+        Optional<Usuario> optionalUsuario = usuarioRepository.findById(id);
+        if (optionalUsuario.isPresent()) {
+            Usuario usuario = optionalUsuario.get();
+            usuario.setNomeCompleto(novoNome);
+            if (novaSenha != null && !novaSenha.isEmpty()) {
+                usuario.setSenha(novaSenha);
+            }
+            return usuarioRepository.save(usuario);
+        }
+        throw new RuntimeException("Usuário não encontrado");
+    }
+
+
 }
