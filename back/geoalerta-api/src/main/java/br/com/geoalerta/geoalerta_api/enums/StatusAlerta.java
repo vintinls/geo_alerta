@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 public enum StatusAlerta {
     PENDENTE,
-    AVALIADO;
+    AVALIADO,
+    EM_PROCESSO,
+    CONCLUIDO;
 
     @JsonCreator
     public static StatusAlerta fromString(String value) {

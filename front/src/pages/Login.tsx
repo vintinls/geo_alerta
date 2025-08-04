@@ -41,7 +41,7 @@ export default function Login() {
           navigate('/dashboard');
           break;
         case 'ANALISTA':
-          navigate('/painelalertas');
+          navigate('/painel-alertas');
           break;
         case 'ADMIN':
           navigate('/paineladmin');

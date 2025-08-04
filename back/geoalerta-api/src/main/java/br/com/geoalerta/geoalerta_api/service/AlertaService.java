@@ -29,6 +29,9 @@ public class AlertaService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    @Autowired
+    private FileStorageService fileStorageService;
+
     public List<AlertaResponseDTO> listarTodos() {
         return alertaRepository.findAll()
                 .stream()
@@ -60,7 +63,7 @@ public class AlertaService {
         return toResponseDTO(salvo);
     }
 
-    // ✅ Novo método que aceita MultipartFile e campos individuais
+    // ✅ Novo método com upload de imagem
     public AlertaResponseDTO criarComImagem(Long usuarioId, String descricao, String endereco, String referencia,
                                             Double latitude, Double longitude, MultipartFile imagem) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
@@ -76,12 +79,13 @@ public class AlertaService {
         alerta.setDataEnvio(LocalDateTime.now());
         alerta.setStatus(StatusAlerta.PENDENTE);
 
-        // Aqui você pode salvar o arquivo ou apenas o nome. Abaixo salva o nome:
         if (imagem != null && !imagem.isEmpty()) {
-            alerta.setUrlImagem(imagem.getOriginalFilename());
-            // Em produção, você deveria salvar o arquivo em um diretório ou armazenamento na nuvem.
-            // Exemplo de como salvar o conteúdo como byte[] no banco:
-            // alerta.setImagemBytes(imagem.getBytes());
+            try {
+                String urlImagem = fileStorageService.salvar(imagem);
+                alerta.setUrlImagem(urlImagem);
+            } catch (IOException e) {
+                throw new RuntimeException("Erro ao salvar imagem: " + e.getMessage());
+            }
         }
 
         Alerta salvo = alertaRepository.save(alerta);

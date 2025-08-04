@@ -29,7 +29,12 @@ public class AlertaController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // ✅ Novo endpoint que aceita multipart/form-data com imagem e campos separados
+    @GetMapping("/usuario/{id}")
+    public ResponseEntity<List<AlertaResponseDTO>> listarPorUsuario(@PathVariable Long id) {
+        List<AlertaResponseDTO> alertas = alertaService.listarPorUsuario(id);
+        return ResponseEntity.ok(alertas);
+    }
+
     @PostMapping(consumes = {"multipart/form-data"})
     public ResponseEntity<AlertaResponseDTO> criarComImagem(
             @RequestParam("usuarioId") Long usuarioId,
@@ -40,12 +45,17 @@ public class AlertaController {
             @RequestParam("longitude") Double longitude,
             @RequestParam("imagem") MultipartFile imagem
     ) {
-        AlertaResponseDTO novoAlerta = alertaService.criarComImagem(usuarioId, descricao, endereco, referencia, latitude, longitude, imagem);
+        AlertaResponseDTO novoAlerta = alertaService.criarComImagem(
+                usuarioId, descricao, endereco, referencia, latitude, longitude, imagem
+        );
         return ResponseEntity.ok(novoAlerta);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AlertaResponseDTO> atualizar(@PathVariable Long id, @RequestBody br.com.geoalerta.geoalerta_api.model.Alerta alertaAtualizado) {
+    public ResponseEntity<AlertaResponseDTO> atualizar(
+            @PathVariable Long id,
+            @RequestBody br.com.geoalerta.geoalerta_api.model.Alerta alertaAtualizado
+    ) {
         AlertaResponseDTO atualizado = alertaService.atualizar(id, alertaAtualizado);
         if (atualizado != null) {
             return ResponseEntity.ok(atualizado);
@@ -58,11 +68,5 @@ public class AlertaController {
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         alertaService.deletar(id);
         return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/usuario/{id}")
-    public ResponseEntity<List<AlertaResponseDTO>> listarPorUsuario(@PathVariable Long id) {
-        List<AlertaResponseDTO> alertas = alertaService.listarPorUsuario(id);
-        return ResponseEntity.ok(alertas);
     }
 }

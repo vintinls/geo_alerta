@@ -87,7 +87,7 @@ const NovoAlerta = () => {
       const usuarioId = usuario.id;
 
       const formDataToSend = new FormData();
-      formDataToSend.append('usuarioId', usuarioId);
+      formDataToSend.append('usuarioId', usuarioId.toString());
       formDataToSend.append('imagem', formData.imagem);
       formDataToSend.append('descricao', formData.descricao);
       formDataToSend.append('endereco', formData.endereco);
@@ -119,7 +119,6 @@ const NovoAlerta = () => {
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-background to-secondary/20 flex flex-col'>
-      {/* Navbar reutilizada */}
       <NavbarCivil />
 
       <main className='flex-1 p-4'>
